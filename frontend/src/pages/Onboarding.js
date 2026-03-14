@@ -4,6 +4,7 @@ import API from '../utils/api';
 import { Check, ClipboardList, Package, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import AnimatePage from '../components/AnimatePage';
 
 const StepCard = ({ title, icon: Icon, completed, active, onClick }) => (
     <div
@@ -88,7 +89,7 @@ const Onboarding = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+        <AnimatePage className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
             <div className="max-w-2xl w-full">
                 <div className="text-center mb-10">
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcome to EOS</h1>
@@ -193,7 +194,7 @@ const Onboarding = () => {
                     </button>
                 </div>
             </div>
-        </div>
+        </AnimatePage>
     );
 };
 

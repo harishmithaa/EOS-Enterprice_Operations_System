@@ -3,12 +3,13 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const StockLog = require('../models/StockLog');
 const Notification = require('../models/Notification');
+const Sale = require('../models/Sale');
 
 // @desc    Create new order
 // @route   POST /api/orders
 // @access  Private
 const createOrder = asyncHandler(async (req, res) => {
-    const { customerName, phoneNumber, address, items, orderDate } = req.body;
+    const { customerName, phoneNumber, address, items, orderDate, shippingAmount } = req.body;
 
     if (!items || items.length === 0) {
         res.status(400);
@@ -42,7 +43,8 @@ const createOrder = asyncHandler(async (req, res) => {
         phoneNumber,
         address,
         items: orderItems,
-        totalAmount,
+        totalAmount: totalAmount + (Number(shippingAmount) || 0),
+        shippingAmount: Number(shippingAmount) || 0,
         orderDate: orderDate || Date.now(),
         status: 'Pending',
     });
@@ -85,6 +87,10 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     }
 
     if (status === 'Delivered' && order.status !== 'Delivered') {
+        let totalSaleAmount = 0;
+        let totalSaleProfit = 0;
+        const saleItems = [];
+
         // Deduct stock
         for (const item of order.items) {
             const product = await Product.findById(item.productId);
@@ -95,8 +101,8 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
                 await StockLog.create({
                     userId: req.user._id,
                     productId: product._id,
-                    changeQuantity: -item.quantity,
-                    actionType: 'ORDER',
+                    quantityChange: -item.quantity,
+                    action: 'ORDER',
                 });
 
                 if (product.stockQuantity <= product.minimumStockThreshold) {
@@ -106,8 +112,36 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
                         type: 'LOW_STOCK',
                     });
                 }
+
+                // Prepare Sale items
+                const subtotal = product.sellingPrice * item.quantity;
+                const profit = (product.sellingPrice - product.costPrice) * item.quantity;
+                
+                totalSaleAmount += subtotal;
+                totalSaleProfit += profit;
+                
+                saleItems.push({
+                    productId: product._id,
+                    quantity: item.quantity,
+                    sellingPrice: product.sellingPrice,
+                    costPrice: product.costPrice,
+                    subtotal,
+                    profit,
+                });
             }
         }
+
+        if (saleItems.length > 0) {
+            await Sale.create({
+                userId: req.user._id,
+                saleDate: Date.now(),
+                totalAmount: totalSaleAmount + (order.shippingAmount || 0),
+                totalProfit: totalSaleProfit + (order.shippingAmount || 0),
+                shippingAmount: order.shippingAmount || 0,
+                items: saleItems,
+            });
+        }
+
         order.deliveryDate = Date.now();
     }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import API from '../utils/api';
 import { Bell, Check, AlertTriangle, Info, ShoppingBag } from 'lucide-react';
+import AnimatePage from '../components/AnimatePage';
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
@@ -37,7 +38,7 @@ const Notifications = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto">
+        <AnimatePage className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Notifications</h1>
@@ -80,7 +81,7 @@ const Notifications = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </AnimatePage>
     );
 };
 

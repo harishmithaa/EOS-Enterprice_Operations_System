@@ -97,7 +97,7 @@ const getDashboardStats = asyncHandler(async (req, res) => {
 // @route   GET /api/analytics/trends
 // @access  Private
 const getSalesTrends = asyncHandler(async (req, res) => {
-    const { period, productId, category } = req.query;
+    const { period, productId, category, startDate: customStart, endDate: customEnd } = req.query;
 
     const today = new Date();
     today.setHours(23, 59, 59, 999);
@@ -107,13 +107,22 @@ const getSalesTrends = asyncHandler(async (req, res) => {
     startDate.setDate(today.getDate() - 30);
     startDate.setHours(0, 0, 0, 0);
 
-    if (period === '7days') {
+    if (customStart && customEnd) {
+        startDate = new Date(customStart);
+        startDate.setHours(0, 0, 0, 0);
+        today.setTime(new Date(customEnd).getTime());
+        today.setHours(23, 59, 59, 999);
+    } else if (period === '7days') {
         startDate = new Date();
-        startDate.setDate(today.getDate() - 7);
+        startDate.setDate(today.getDate() - 6); // Last 7 days including today
+        startDate.setHours(0, 0, 0, 0);
+    } else if (period === '30days') {
+        startDate = new Date();
+        startDate.setDate(today.getDate() - 29);
         startDate.setHours(0, 0, 0, 0);
     } else if (period === '90days') {
         startDate = new Date();
-        startDate.setDate(today.getDate() - 90);
+        startDate.setDate(today.getDate() - 89);
         startDate.setHours(0, 0, 0, 0);
     } else if (period === 'year') {
         startDate = new Date();
@@ -167,6 +176,9 @@ const getSalesTrends = asyncHandler(async (req, res) => {
             _id: { $dateToString: { format: '%Y-%m-%d', date: '$saleDate' } },
             amount: {
                 $sum: (productId || category) ? '$items.subtotal' : '$totalAmount'
+            },
+            profit: {
+                $sum: (productId || category) ? '$items.profit' : '$totalProfit'
             }
         }
     });

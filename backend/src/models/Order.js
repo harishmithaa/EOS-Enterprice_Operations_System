@@ -17,6 +17,7 @@ const orderSchema = new mongoose.Schema({
         default: 'Pending'
     },
     totalAmount: { type: Number, required: true },
+    shippingAmount: { type: Number, default: 0 },
     items: [{
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
         quantity: { type: Number, required: true },

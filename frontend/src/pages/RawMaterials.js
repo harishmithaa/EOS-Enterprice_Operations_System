@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import API from '../utils/api';
 import { Plus, Trash2, Edit2, AlertTriangle, Layers } from 'lucide-react';
 import { toast } from 'react-toastify';
+import AnimatePage from '../components/AnimatePage';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const RawMaterials = () => {
     const [materials, setMaterials] = useState([]);
@@ -79,7 +81,7 @@ const RawMaterials = () => {
     const closeModal = () => setShowModal(false);
 
     return (
-        <div>
+        <AnimatePage>
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Raw Materials</h1>
@@ -148,9 +150,20 @@ const RawMaterials = () => {
             )}
 
             {/* Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl w-full max-w-md p-6">
+            <AnimatePresence>
+                {showModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-white rounded-xl w-full max-w-md p-6 shadow-2xl"
+                        >
                         <h2 className="text-xl font-bold mb-4">{editingMaterial ? 'Edit Material' : 'Add Material'}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
@@ -181,10 +194,11 @@ const RawMaterials = () => {
                                 <button type="submit" className="flex-1 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">Save</button>
                             </div>
                         </form>
-                    </div>
-                </div>
-            )}
-        </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </AnimatePage>
     );
 };
 

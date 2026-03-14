@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Store, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
+import AnimatePage from '../components/AnimatePage';
 
 const Auth = () => {
     const [isLogin, setIsLogin] = useState(true);
@@ -60,7 +61,7 @@ const Auth = () => {
     };
 
     return (
-        <div className="min-h-screen bg-emerald-950 flex items-center justify-center p-4">
+        <AnimatePage className="min-h-screen bg-emerald-950 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
                 <div className="p-8">
                     <div className="text-center mb-8">
@@ -140,7 +141,7 @@ const Auth = () => {
                     </p>
                 </div>
             </div>
-        </div>
+        </AnimatePage>
     );
 };
 

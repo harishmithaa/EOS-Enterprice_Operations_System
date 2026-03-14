@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import API from '../utils/api';
 import { Plus, Search, Edit2, Trash2, X, Upload, Image as ImageIcon } from 'lucide-react';
 import { toast } from 'react-toastify';
+import AnimatePage from '../components/AnimatePage';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Products = () => {
     const [products, setProducts] = useState([]);
@@ -31,6 +33,7 @@ const Products = () => {
             const { data } = await API.get('/products');
             setProducts(data);
         } catch (error) {
+            console.error('Error fetching products:', error);
             toast.error('Failed to load products');
         } finally {
             setLoading(false);
@@ -71,7 +74,7 @@ const Products = () => {
             fetchProducts();
             closeModal();
         } catch (error) {
-            console.error(error);
+            console.error('Error saving product:', error);
             toast.error(error.response?.data?.message || 'Operation failed');
         }
     };
@@ -128,7 +131,7 @@ const Products = () => {
     );
 
     return (
-        <div>
+        <AnimatePage>
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Products</h1>
@@ -199,7 +202,7 @@ const Products = () => {
                             <div className="p-4">
                                 <h3 className="font-bold text-gray-800 mb-1 truncate">{product.name}</h3>
                                 <div className="flex justify-between items-center mb-3">
-                                    <span className="text-emerald-600 font-bold">${product.sellingPrice}</span>
+                                    <span className="text-emerald-600 font-bold">₹{product.sellingPrice}</span>
                                     <span className={`text-xs px-2 py-1 rounded-full ${product.stockQuantity === 0 ? 'bg-red-100 text-red-700' :
                                         product.stockQuantity <= product.minimumStockThreshold ? 'bg-orange-100 text-orange-700' :
                                             'bg-emerald-50 text-emerald-700'
@@ -229,9 +232,20 @@ const Products = () => {
             )}
 
             {/* Modal */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <AnimatePresence>
+                {showModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl"
+                        >
                         <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
                             <h2 className="text-xl font-bold">{editingProduct ? 'Edit Product' : 'Add Product'}</h2>
                             <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
@@ -298,10 +312,11 @@ const Products = () => {
                                 {editingProduct ? 'Update Product' : 'Save Product'}
                             </button>
                         </form>
-                    </div>
-                </div>
-            )}
-        </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </AnimatePage>
     );
 };
 

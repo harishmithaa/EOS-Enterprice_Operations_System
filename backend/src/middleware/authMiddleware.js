@@ -15,6 +15,11 @@ const protect = async (req, res, next) => {
 
             req.user = await User.findById(decoded.id).select('-passwordHash');
 
+            if (!req.user) {
+                res.status(401);
+                throw new Error('User not found');
+            }
+
             next();
         } catch (error) {
             console.error(error);

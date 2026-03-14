@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const RawMaterial = require('../models/RawMaterial');
+const Notification = require('../models/Notification');
 
 // @desc    Get all raw materials
 // @route   GET /api/materials
@@ -27,6 +28,14 @@ const createMaterial = asyncHandler(async (req, res) => {
         unit,
         minimumStockThreshold
     });
+
+    if (material.quantity <= material.minimumStockThreshold) {
+        await Notification.create({
+            userId: req.user._id,
+            message: `Low Stock Alert: Raw Material ${material.name} is below threshold.`,
+            type: 'LOW_STOCK',
+        });
+    }
 
     res.status(201).json(material);
 });
@@ -59,6 +68,14 @@ const updateMaterial = asyncHandler(async (req, res) => {
         req.body,
         { new: true }
     );
+
+    if (updatedMaterial && updatedMaterial.quantity <= updatedMaterial.minimumStockThreshold) {
+        await Notification.create({
+            userId: req.user._id,
+            message: `Low Stock Alert: Raw Material ${updatedMaterial.name} is below threshold.`,
+            type: 'LOW_STOCK',
+        });
+    }
 
     res.json(updatedMaterial);
 });

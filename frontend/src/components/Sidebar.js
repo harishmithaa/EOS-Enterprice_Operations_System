@@ -6,7 +6,8 @@ import {
     ClipboardList,
     Bell,
     Layers,
-    Store
+    Store,
+    History
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -16,7 +17,7 @@ const Sidebar = () => {
         { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { path: '/products', label: 'Products', icon: Package },
         { path: '/raw-materials', label: 'Raw Materials', icon: Layers },
-        { path: '/sales', label: 'Sales', icon: Store },
+        { path: '/sales', label: 'Sales History', icon: History },
         { path: '/orders', label: 'Orders', icon: ClipboardList },
         { path: '/notifications', label: 'Notifications', icon: Bell },
     ];

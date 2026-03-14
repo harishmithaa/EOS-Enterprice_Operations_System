@@ -58,8 +58,16 @@ const createProduct = asyncHandler(async (req, res) => {
         await StockLog.create({
             userId: req.user._id,
             productId: createdProduct._id,
-            changeQuantity: stockQuantity,
-            actionType: 'ADD',
+            quantityChange: stockQuantity,
+            action: 'ADD',
+        });
+    }
+
+    if (createdProduct.stockQuantity <= createdProduct.minimumStockThreshold) {
+        await Notification.create({
+            userId: req.user._id,
+            message: `Low Stock Alert: Product ${createdProduct.name} is below threshold.`,
+            type: 'LOW_STOCK',
         });
     }
 
@@ -104,8 +112,8 @@ const updateProduct = asyncHandler(async (req, res) => {
             await StockLog.create({
                 userId: req.user._id,
                 productId: updatedProduct._id,
-                changeQuantity: stockChange,
-                actionType: 'UPDATE', // Manual update
+                quantityChange: stockChange,
+                action: 'ADJUSTMENT', // Manual update
             });
         }
 

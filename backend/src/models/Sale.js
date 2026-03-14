@@ -9,6 +9,7 @@ const saleSchema = new mongoose.Schema({
     saleDate: { type: Date, default: Date.now },
     totalAmount: { type: Number, required: true },
     totalProfit: { type: Number, required: true },
+    shippingAmount: { type: Number, default: 0 },
     items: [{
         productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
         quantity: { type: Number, required: true },

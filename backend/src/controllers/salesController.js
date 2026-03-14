@@ -55,8 +55,8 @@ const createSale = asyncHandler(async (req, res) => {
         await StockLog.create({
             userId: req.user._id,
             productId: product._id,
-            changeQuantity: -item.quantity,
-            actionType: 'SALE',
+            quantityChange: -item.quantity,
+            action: 'SALE',
         });
 
         // Check Low Stock
@@ -84,7 +84,24 @@ const createSale = asyncHandler(async (req, res) => {
 // @route   GET /api/sales
 // @access  Private
 const getSales = asyncHandler(async (req, res) => {
-    const sales = await Sale.find({ userId: req.user._id })
+    const { date, startDate, endDate } = req.query;
+    let query = { userId: req.user._id };
+
+    if (date) {
+        const start = new Date(date);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(date);
+        end.setHours(23, 59, 59, 999);
+        query.saleDate = { $gte: start, $lte: end };
+    } else if (startDate && endDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        query.saleDate = { $gte: start, $lte: end };
+    }
+
+    const sales = await Sale.find(query)
         .populate('items.productId', 'name')
         .sort({ saleDate: -1 });
     res.json(sales);

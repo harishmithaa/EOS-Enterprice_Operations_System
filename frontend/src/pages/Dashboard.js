@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import API from '../utils/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { DollarSign, ShoppingBag, AlertTriangle, Package } from 'lucide-react';
+import AnimatePage from '../components/AnimatePage';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex items-center">
@@ -27,6 +28,8 @@ const Dashboard = () => {
     const [period, setPeriod] = useState('30days');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedProduct, setSelectedProduct] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     // Filter Options
     const [categories, setCategories] = useState([]);
@@ -38,7 +41,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchTrends();
-    }, [period, selectedCategory, selectedProduct]);
+    }, [period, selectedCategory, selectedProduct, startDate, endDate]);
 
     const fetchDashboardData = async () => {
         try {
@@ -67,6 +70,10 @@ const Dashboard = () => {
             const params = { period };
             if (selectedCategory) params.category = selectedCategory;
             if (selectedProduct) params.productId = selectedProduct;
+            if (startDate && endDate) {
+                params.startDate = startDate;
+                params.endDate = endDate;
+            }
 
             const { data } = await API.get('/analytics/trends', { params });
             setTrendData(data);
@@ -81,13 +88,13 @@ const Dashboard = () => {
     if (!stats) return <div className="p-8 text-center text-red-500">Failed to load stats.</div>;
 
     return (
-        <div className="space-y-6">
+        <AnimatePage className="space-y-6">
             <h1 className="text-2xl font-bold text-gray-800">Overview</h1>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard title="Today's Sales" value={`$${stats.salesToday}`} icon={DollarSign} color="bg-blue-500" />
-                <StatCard title="Monthly Profit" value={`$${stats.profitMonth}`} icon={DollarSign} color="bg-green-500" />
+                <StatCard title="Today's Sales" value={`₹${stats.salesToday}`} icon={DollarSign} color="bg-blue-500" />
+                <StatCard title="Monthly Profit" value={`₹${stats.profitMonth}`} icon={DollarSign} color="bg-green-500" />
                 <StatCard title="Total Products" value={stats.totalProducts} icon={Package} color="bg-indigo-500" />
                 <StatCard title="Low Stock Items" value={stats.lowStockCount} icon={AlertTriangle} color="bg-red-500" />
             </div>
@@ -102,13 +109,41 @@ const Dashboard = () => {
                         <select
                             className="border rounded-md px-3 py-1 text-sm outline-none focus:border-emerald-500"
                             value={period}
-                            onChange={(e) => setPeriod(e.target.value)}
+                            onChange={(e) => {
+                                setPeriod(e.target.value);
+                                setStartDate('');
+                                setEndDate('');
+                            }}
+                            disabled={startDate || endDate}
                         >
                             <option value="7days">Last 7 Days</option>
                             <option value="30days">Last 30 Days</option>
                             <option value="90days">Last 3 Months</option>
                             <option value="year">Last Year</option>
                         </select>
+
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="date"
+                                className="border rounded-md px-3 py-1 text-sm outline-none focus:border-emerald-500"
+                                value={startDate}
+                                onChange={(e) => {
+                                    setStartDate(e.target.value);
+                                    setPeriod(''); // Clear preset if custom date used
+                                }}
+                            />
+                            <span className="text-gray-400">-</span>
+                            <input
+                                type="date"
+                                className="border rounded-md px-3 py-1 text-sm outline-none focus:border-emerald-500"
+                                value={endDate}
+                                min={startDate}
+                                onChange={(e) => {
+                                    setEndDate(e.target.value);
+                                    setPeriod(''); // Clear preset if custom date used
+                                }}
+                            />
+                        </div>
 
                         <select
                             className="border rounded-md px-3 py-1 text-sm outline-none focus:border-emerald-500"
@@ -152,10 +187,19 @@ const Dashboard = () => {
                                 <Line
                                     type="monotone"
                                     dataKey="amount"
-                                    name="Sales Amount ($)"
+                                    name="Sales Amount (₹)"
                                     stroke="#0f766e"
                                     strokeWidth={3}
                                     dot={{ r: 4, fill: '#0f766e' }}
+                                    activeDot={{ r: 6 }}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="profit"
+                                    name="Profit (₹)"
+                                    stroke="#10b981"
+                                    strokeWidth={3}
+                                    dot={{ r: 4, fill: '#10b981' }}
                                     activeDot={{ r: 6 }}
                                 />
                             </LineChart>
@@ -191,7 +235,7 @@ const Dashboard = () => {
                     )}
                 </div>
             </div>
-        </div>
+        </AnimatePage>
     );
 };
 
