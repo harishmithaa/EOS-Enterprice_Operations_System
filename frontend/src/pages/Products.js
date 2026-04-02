@@ -186,7 +186,7 @@ const Products = () => {
                             <div className="h-48 bg-gray-100 relative">
                                 {product.imageUrl ? (
                                     <img
-                                        src={`http://localhost:5000${product.imageUrl}`}
+                                        src={`${process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000'}${product.imageUrl}`}
                                         alt={product.name}
                                         className="w-full h-full object-cover"
                                     />

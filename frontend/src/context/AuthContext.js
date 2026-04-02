@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import API from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            const { data } = await axios.post('http://localhost:5000/api/auth/login', { email, password });
+            const { data } = await API.post('/auth/login', { email, password });
             localStorage.setItem('user', JSON.stringify(data));
             setUser(data);
             if (!data.isOnboarded) {
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (email, password) => {
         try {
-            const { data } = await axios.post('http://localhost:5000/api/auth/register', { email, password });
+            const { data } = await API.post('/auth/register', { email, password });
             localStorage.setItem('user', JSON.stringify(data));
             setUser(data);
             navigate('/onboarding');
